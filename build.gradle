@@ -34,36 +34,6 @@ dependencies {
     testImplementation 'org.testng:testng:7.4.0'
 }
 
-
-task compile2(type: JavaCompile) {
-    doFirst {
-source = fileTree(dir: sourceDir, includes: ['**/*.java'])
-    def directory = project.properties['d']
-    
-    println("directory - $directory")
-    if (directory == null) {               
-      	destinationDir = file("$build_dir/classes")
-    } else {	
-	destinationDir = file("$build_dir/$directory")
-    }    
-    }
-    destinationDir = file("$build_dir/classes")
-    
-    
-    classpath = configurations.compileClasspath
-
-    
-}
-
-
-task build2(type: Jar, dependsOn: compile2) {
-    doLast {
-    
-    //from compile2.destinationDir
-}
-}
-
-
 task compile1(type: JavaCompile) {   
     def directory = project.properties['directory']
     
@@ -121,8 +91,6 @@ task createWar(type: War, dependsOn: compile1) {
         }
     }
 
-
-
     def directory = project.properties['directory']
     if (directory == null) {
   	destinationDirectory = file("$buildDir")
@@ -133,30 +101,11 @@ task createWar(type: War, dependsOn: compile1) {
 
 task build3(dependsOn: [createWar, createJar]) {
     println("Start build")
-    // пустая задача, просто запускает createWar и createJar
 }
 
 task clean2(type: Delete) {
     delete buildDir
     delete targetDir
-}
-
-task native2ascii(type: Copy) {
-    delete 'src/main/resources/native2ascii'
-    from 'src/main/resources'
-    into 'src/main/resources/native2ascii'
-    include '**/*.properties'
-    eachFile { file ->
-        def reader = new FileReader(file.file)
-        def content = reader.text
-        reader.close()
-        def asciiContent = content.replaceAll(/[\u0080-\uFFFF]/) { match ->
-            String hex = Integer.toHexString(match.codePointAt(0))
-            '\\u' + hex.padLeft(4, '0')
-        }
-        file.file.write(asciiContent, 'UTF-8')
-    }
-    
 }
 
 task native2ascii2 {
@@ -190,35 +139,7 @@ task music {
     }
 }
 
-task music2 {
-    doLast {
-        def musicUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-        def url = new URL(musicUrl)
-        def inputStream = url.openStream()
-        def bytes = new byte[inputStream.available()]
-        inputStream.read(bytes)
-        inputStream.close()
-
-        def audioInputStream = new AudioInputStream(new ByteArrayInputStream(bytes), new AudioFormat(44100, 16, 2, true, false), bytes.length / (2 * 2) as int)
-        def audioFormat = audioInputStream.getFormat()
-        def info = new DataLine.Info(SourceDataLine.class, audioFormat)
-        def sourceDataLine = (SourceDataLine) AudioSystem.getLine(info)
-        sourceDataLine.open(audioFormat)
-        sourceDataLine.start()
-        byte[] buffer = new byte[1024]
-        int bytesRead
-        def startTime = System.currentTimeMillis()
-        while ((bytesRead = audioInputStream.read(buffer, 0, buffer.length))!= -1 && System.currentTimeMillis() - startTime < 60000) {
-            sourceDataLine.write(buffer, 0, bytesRead)
-        }
-        sourceDataLine.drain()
-        Thread.sleep(100) // добавляем задержку в 100 мс
-        sourceDataLine.stop()
-        sourceDataLine.close()
-    }
-}
-
-//build3.finalizedBy music
+build3.finalizedBy music
 
 task xml {
     doLast {
