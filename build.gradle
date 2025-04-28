@@ -64,7 +64,7 @@ task build2(type: Jar, dependsOn: compile2) {
 }
 
 
-task compile(type: JavaCompile) {   
+task compile1(type: JavaCompile) {   
     def directory = project.properties['directory']
     
     println("directory - $directory")
@@ -78,8 +78,8 @@ task compile(type: JavaCompile) {
     classpath = configurations.compileClasspath	
 }
 
-task createJar(type: Jar, dependsOn: compile3) {
-    from compile.destinationDir
+task createJar(type: Jar, dependsOn: compile1) {
+    from compile1.destinationDir
     archiveFileName ='myapp.jar'
 
     def directory = project.properties['directory']
@@ -90,8 +90,8 @@ task createJar(type: Jar, dependsOn: compile3) {
     }
 }
 
-task createWar(type: War, dependsOn: compile3) {
-    from compile.destinationDir
+task createWar(type: War, dependsOn: compile1) {
+    from compile1.destinationDir
     archiveFileName ='0.war'
     
 
@@ -109,7 +109,7 @@ task createWar(type: War, dependsOn: compile3) {
         from(configurations.runtimeClasspath) {
             into 'lib'
         }
-        from(compile.destinationDir) {            
+        from(compile1.destinationDir) {            
 	    into 'classes'
         }
     }
